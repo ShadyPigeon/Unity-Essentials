@@ -1,6 +1,6 @@
 ﻿using UnityEngine;
 
-namespace ShadyPigeon.UnityEssentials
+namespace UnityEssentials
 {
     public class Singleton<T> : MonoBehaviour where T : MonoBehaviour
     {

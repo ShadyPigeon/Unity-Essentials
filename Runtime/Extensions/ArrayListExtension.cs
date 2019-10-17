@@ -1,46 +1,48 @@
 ﻿using UnityEngine;
 using System.Collections;
 
-public static class ArrayListExtension
+namespace UnityEssentials
 {
-    /*
-     * ArrayList class extension method to add values only they are not null
-     */
-    public static void AddNotNull(this ArrayList arrayList, object theObject)
+    public static class ArrayListExtension
     {
-        if (theObject != null)
+        /*
+         * ArrayList class extension method to add values only they are not null
+         */
+        public static void AddNotNull(this ArrayList collection, object entity)
         {
-            arrayList.Add(theObject);
-        }
-    }
-    /*
-     * Removes from the ArrayList those elements that exist in a given ArrayList
-     */
-    public static void Exclusive(this ArrayList arrayList, ArrayList sourceArrayList)
-    {
-        ArrayList exclusives = new ArrayList();
-        foreach (object anObject in arrayList)
-        {
-            if (!sourceArrayList.Contains(anObject))
+            if (entity != null)
             {
-                exclusives.Add(anObject);
+                collection.Add(entity);
             }
         }
-        arrayList.RemoveRange(0, arrayList.Count);
-        arrayList.AddRange(exclusives);
-    }
-    /* Removes all duplications */
-    public static ArrayList Distinct(this ArrayList arrayList)
-    {
-        ArrayList returnArray = new ArrayList();
-        foreach (object someObject in arrayList)
+        /*
+         * Removes from the ArrayList those elements that exist in a given ArrayList
+         */
+        public static void Exclusive(this ArrayList collection, ArrayList sourceCollection)
         {
-            if (!returnArray.Contains(someObject))
+            ArrayList exclusives = new ArrayList();
+            foreach (object entity in collection)
             {
-                returnArray.Add(someObject);
+                if (!sourceCollection.Contains(entity))
+                {
+                    exclusives.Add(entity);
+                }
             }
+            collection.RemoveRange(0, collection.Count);
+            collection.AddRange(exclusives);
         }
-        return returnArray;
+        /* Removes all duplications */
+        public static ArrayList Distinct(this ArrayList collection)
+        {
+            ArrayList result = new ArrayList();
+            foreach (object entity in collection)
+            {
+                if (!result.Contains(entity))
+                {
+                    result.Add(entity);
+                }
+            }
+            return result;
+        }
     }
 }
-
