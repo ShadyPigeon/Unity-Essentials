@@ -35,7 +35,7 @@ namespace UnityEssentials
         public static ArrayList Distinct(this ArrayList collection)
         {
             ArrayList result = new ArrayList();
-            foreach (object entityityE in collection)
+            foreach (object entity in collection)
             {
                 if (!result.Contains(entity))
                 {
