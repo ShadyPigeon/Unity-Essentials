@@ -2,20 +2,20 @@
 
 namespace ShadyPigeon.UnityEssentials
 {
-    public class Singleton<TSelfType> : MonoBehaviour where TSelfType : MonoBehaviour
+    public class Singleton<T> : MonoBehaviour where T : MonoBehaviour
     {
-        private static TSelfType m_Instance = null;
-        public static TSelfType Instance
+        private static T m_Instance = null;
+        public static T Instance
         {
             get
             {
                 if (m_Instance == null)
                 {
-                    var type = typeof(TSelfType);
-                    m_Instance = (TSelfType)FindObjectOfType(type);
+                    var type = typeof(T);
+                    m_Instance = (T)FindObjectOfType(type);
                     if (m_Instance == null)
                     {
-                        m_Instance = (new GameObject(type.Name)).AddComponent<TSelfType>();
+                        m_Instance = (new GameObject(type.Name)).AddComponent<T>();
                     }
                     DontDestroyOnLoad(m_Instance);
                 }
