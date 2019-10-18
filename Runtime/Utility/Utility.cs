@@ -6,107 +6,110 @@ using System.IO;
 using System.Xml.Serialization;
 using UnityEngine.Events;
 
-public static class Utility
+namespace UnityEssentials
 {
-
-    public static bool IsOutsideScreen(Vector3 position)
+    public static class Utility
     {
-        Vector3 viewportPos = Camera.main.WorldToViewportPoint(position);
-        if (viewportPos.x < 0.0f || 1.0f < viewportPos.x ||
-            viewportPos.y < 0.0f || 1.0f < viewportPos.y)
+        public static bool IsOutsideScreen(Vector3 position, Camera cam = null)
         {
-            return true;
-        }
+            if (cam == null)
+                cam = Camera.main;
 
-        return false;
-    }
-
-    public static IEnumerator EntityLeftScreen(UnityAction action, Transform entity)
-    {
-        while (true)
-        {
-            if(IsOutsideScreen(entity.position))
+            Vector3 viewportPos = cam.WorldToViewportPoint(position);
+            if (viewportPos.x < 0.0f || 1.0f < viewportPos.x ||
+                viewportPos.y < 0.0f || 1.0f < viewportPos.y)
             {
-                break;
+                return true;
             }
 
-            yield return new WaitForEndOfFrame();
+            return false;
         }
-
-        action();
-    }
-    public static IEnumerator DelaySeconds(UnityAction action, float delay)
-    {
-        yield return new WaitForSeconds(delay);
-        action();
-    }
-
-    public static float GetMaxDuration(this Component self)
-    {
-        ParticleSystem[] particles = self.GetComponentsInChildren<ParticleSystem>();
-        AudioSource[] sounds = self.GetComponentsInChildren<AudioSource>();
-
-        float maxDuration = float.MinValue; 
-
-        foreach (var particle in particles)
+        public static IEnumerator EntityLeftScreen(UnityAction action, Transform entity)
         {
-            if(particle.main.duration > maxDuration)
+            while (true)
             {
-                maxDuration = particle.main.duration;
-            }
-        }
+                if (IsOutsideScreen(entity.position))
+                {
+                    break;
+                }
 
-        foreach (var sound in sounds)
+                yield return new WaitForEndOfFrame();
+            }
+
+            action();
+        }
+        public static IEnumerator DelaySeconds(UnityAction action, float delay)
         {
-            if(sound.clip.length > maxDuration)
+            yield return new WaitForSeconds(delay);
+            action();
+        }
+        public static float GetMaxDuration(this Component self)
+        {
+            ParticleSystem[] particles = self.GetComponentsInChildren<ParticleSystem>();
+            AudioSource[] sounds = self.GetComponentsInChildren<AudioSource>();
+
+            float maxDuration = float.MinValue;
+
+            foreach (var particle in particles)
             {
-                maxDuration = sound.clip.length;
+                if (particle.main.duration > maxDuration)
+                {
+                    maxDuration = particle.main.duration;
+                }
             }
-        }
 
-        return maxDuration;
-    }
-    public static float ClampAngle(float angle, float min, float max)
-    {
-        angle = Mathf.Repeat(angle, 360);
-        min = Mathf.Repeat(min, 360);
-        max = Mathf.Repeat(max, 360);
-        if (min > max)
-        {
-            if (angle > min || angle < max) return angle;
-            return angle > (min + max) / 2f ? min : max;
+            foreach (var sound in sounds)
+            {
+                if (sound.clip.length > maxDuration)
+                {
+                    maxDuration = sound.clip.length;
+                }
+            }
+
+            return maxDuration;
         }
-        if (angle > min && angle < max) return angle;
-        return angle < min ? min : max;
-    }
-    public static void SaveData<T>(T data, string filePath)
-    {
-        var serializer = new XmlSerializer(typeof(T));
-        using (var stream = new FileStream(filePath, FileMode.Create))
+        public static float ClampAngle(float angle, float min, float max)
         {
-            serializer.Serialize(stream, data);
+            angle = Mathf.Repeat(angle, 360);
+            min = Mathf.Repeat(min, 360);
+            max = Mathf.Repeat(max, 360);
+            if (min > max)
+            {
+                if (angle > min || angle < max) return angle;
+                return angle > (min + max) / 2f ? min : max;
+            }
+            if (angle > min && angle < max) return angle;
+            return angle < min ? min : max;
         }
-    }
-    public static T LoadData<T>(string filePath)
-    {
-        if (File.Exists(filePath))
+        public static void SaveData<T>(T data, string filePath)
         {
             var serializer = new XmlSerializer(typeof(T));
-            using (var stream = new FileStream(filePath, FileMode.Open))
+            using (var stream = new FileStream(filePath, FileMode.Create))
             {
-                return (T)serializer.Deserialize(stream);
+                serializer.Serialize(stream, data);
             }
         }
-        return default;
-    }
-    public static Dictionary<string, T> LoadDatabase<T>(string path) where T : Object
-    {
-        Dictionary<string, T> database = new Dictionary<string, T>();
-        T[] collection = Resources.LoadAll<T>(path) as T[];
-        foreach (var item in collection)
+        public static T LoadData<T>(string filePath)
         {
-            database.Add(item.name, item);
+            if (File.Exists(filePath))
+            {
+                var serializer = new XmlSerializer(typeof(T));
+                using (var stream = new FileStream(filePath, FileMode.Open))
+                {
+                    return (T)serializer.Deserialize(stream);
+                }
+            }
+            return default;
         }
-        return database;
+        public static Dictionary<string, T> LoadDatabase<T>(string path) where T : Object
+        {
+            Dictionary<string, T> database = new Dictionary<string, T>();
+            T[] collection = Resources.LoadAll<T>(path) as T[];
+            foreach (var item in collection)
+            {
+                database.Add(item.name, item);
+            }
+            return database;
+        }
     }
 }
