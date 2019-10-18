@@ -7,7 +7,7 @@ using UnityEditor;
 public class ContinuousIntegration
 {
     static string[] scenes = FindEnabledEditorScenes();
-        
+
     static string GetAppName()
     {
         return Application.productName;
@@ -36,7 +36,7 @@ public class ContinuousIntegration
 
     [MenuItem("Custom/CI/Build Mac OS X")]
     static void PerformMacOSXBuild()
-    { 
+    {
         string targetDir = GetAppName() + ".app";
         BuildTargetGroup targetGroup = BuildTargetGroup.Standalone;
         BuildTarget target = BuildTarget.StandaloneOSX;
@@ -63,12 +63,16 @@ public class ContinuousIntegration
         switch (summary.result)
         {
             case BuildResult.Unknown:
+                Debug.Log("Succeeded!");
                 break;
             case BuildResult.Succeeded:
+                Debug.Log("Succeeded!");
                 break;
             case BuildResult.Failed:
-                throw new System.Exception("BuildPlayer failure: " + "UNSURE");
+                Debug.Log("Failed!");
+                break;
             case BuildResult.Cancelled:
+                Debug.Log("Succeeded!");
                 break;
             default:
                 break;
