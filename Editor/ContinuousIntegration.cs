@@ -24,24 +24,50 @@ public class ContinuousIntegration
 
     }
 
-    [MenuItem("Custom/CI/Android")]
-    static void PerformAndroidBuild()
+    [MenuItem("Build/Android")]
+    public static void PerformAndroidBuild()
     {
-        string targetDir = GetAppName() + ".apk";
-        BuildTargetGroup targetGroup = BuildTargetGroup.Android;
-        BuildTarget target = BuildTarget.Android;
-        BuildOptions options = BuildOptions.None;
-        GenericBuild(scenes, GetTargetName(targetGroup) + "/" + targetDir, targetGroup, target, options);
+        BuildPlayerOptions buildPlayerOptions = new BuildPlayerOptions();
+        buildPlayerOptions.scenes = FindEnabledEditorScenes();
+        buildPlayerOptions.locationPathName = "Builds/Android/" + GetAppName() + ".apk";
+        buildPlayerOptions.target = BuildTarget.Android;
+        buildPlayerOptions.options = BuildOptions.None;
+
+        BuildReport report = BuildPipeline.BuildPlayer(buildPlayerOptions);
+        BuildSummary summary = report.summary;
+
+        if (summary.result == BuildResult.Succeeded)
+        {
+            Debug.Log("Build succeeded: " + summary.totalSize + " bytes");
+        }
+
+        if (summary.result == BuildResult.Failed)
+        {
+            Debug.Log("Build failed");
+        }
     }
 
-    [MenuItem("Custom/CI/Build Mac OS X")]
-    static void PerformMacOSXBuild()
+    [MenuItem("Build/Build Mac OS X")]
+    public static void PerformMacOSXBuild()
     {
-        string targetDir = GetAppName() + ".app";
-        BuildTargetGroup targetGroup = BuildTargetGroup.Standalone;
-        BuildTarget target = BuildTarget.StandaloneOSX;
-        BuildOptions options = BuildOptions.None;
-        GenericBuild(scenes, GetTargetName(targetGroup) + "/" + targetDir, targetGroup, target, options);
+        BuildPlayerOptions buildPlayerOptions = new BuildPlayerOptions();
+        buildPlayerOptions.scenes = FindEnabledEditorScenes();
+        buildPlayerOptions.locationPathName = "Builds/iOS";
+        buildPlayerOptions.target = BuildTarget.iOS;
+        buildPlayerOptions.options = BuildOptions.None;
+
+        BuildReport report = BuildPipeline.BuildPlayer(buildPlayerOptions);
+        BuildSummary summary = report.summary;
+
+        if (summary.result == BuildResult.Succeeded)
+        {
+            Debug.Log("Build succeeded: " + summary.totalSize + " bytes");
+        }
+
+        if (summary.result == BuildResult.Failed)
+        {
+            Debug.Log("Build failed");
+        }
     }
 
     private static string[] FindEnabledEditorScenes()
@@ -53,29 +79,5 @@ public class ContinuousIntegration
             EditorScenes.Add(scene.path);
         }
         return EditorScenes.ToArray();
-    }
-
-    static void GenericBuild(string[] scenes, string targetDir, BuildTargetGroup buildTargetGroup, BuildTarget buildTarget, BuildOptions buildOptions)
-    {
-        EditorUserBuildSettings.SwitchActiveBuildTarget(buildTargetGroup, buildTarget);
-        BuildReport buildReport = BuildPipeline.BuildPlayer(scenes, "Builds" + "/" + targetDir, buildTarget, buildOptions);
-        BuildSummary summary = buildReport.summary;
-        switch (summary.result)
-        {
-            case BuildResult.Unknown:
-                Debug.Log("Succeeded!");
-                break;
-            case BuildResult.Succeeded:
-                Debug.Log("Succeeded!");
-                break;
-            case BuildResult.Failed:
-                Debug.Log("Failed!");
-                break;
-            case BuildResult.Cancelled:
-                Debug.Log("Succeeded!");
-                break;
-            default:
-                break;
-        }
     }
 }
