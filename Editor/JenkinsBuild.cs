@@ -31,12 +31,11 @@ public class JenkinsBuild
         {
             if (args[i] == "-executeMethod")
             {
-                if (i + 4 < args.Length)
+                if (i + 3 < args.Length)
                 {
-                    // BuildMacOS method is args[i+1]
+                    // Android method is args[i+1]
                     appName = args[i + 2];
                     targetDir = args[i + 3];
-                    i += 3;
                 }
                 else
                 {
@@ -69,12 +68,11 @@ public class JenkinsBuild
         {
             if (args[i] == "-executeMethod")
             {
-                if (i + 4 < args.Length)
+                if (i + 3 < args.Length)
                 {
                     // BuildMacOS method is args[i+1]
                     appName = args[i + 2];
                     targetDir = args[i + 3];
-                    i += 3;
                 }
                 else
                 {
