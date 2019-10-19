@@ -1,83 +1,137 @@
-﻿using System.Collections.Generic;
+﻿// -------------------------------------------------------------------------------------------------
+// Assets/Editor/JenkinsBuild.cs
+// -------------------------------------------------------------------------------------------------
 using UnityEngine;
-
-using UnityEditor.Build.Reporting;
 using UnityEditor;
+using System.Collections.Generic;
+using UnityEditor.Build.Reporting;
 
-public class ContinuousIntegration
+// ------------------------------------------------------------------------
+// https://docs.unity3d.com/Manual/CommandLineArguments.html
+// ------------------------------------------------------------------------
+public class JenkinsBuild
 {
-    static string[] scenes = FindEnabledEditorScenes();
 
-    static string GetAppName()
-    {
-        return Application.productName;
-    }
-
-    static string GetTargetName(BuildTargetGroup targetGroup)
-    {
-        return targetGroup.ToString();
-    }
-
-    public static void PerformBuild()
-    {
-        PerformAndroidBuild();
-
-    }
-
+    static string[] EnabledScenes = FindEnabledEditorScenes();
+    // ------------------------------------------------------------------------
+    // called from Jenkins
+    // ------------------------------------------------------------------------
     [MenuItem("Build/Android")]
-    public static void PerformAndroidBuild()
+    public static void BuildAndroid()
     {
-        BuildPlayerOptions buildPlayerOptions = new BuildPlayerOptions();
-        buildPlayerOptions.scenes = FindEnabledEditorScenes();
-        buildPlayerOptions.locationPathName = "Builds/Android/" + GetAppName() + ".apk";
-        buildPlayerOptions.target = BuildTarget.Android;
-        buildPlayerOptions.options = BuildOptions.None;
+        string appName = "TestProject";
+        string targetDir = "~/Desktop";
 
-        BuildReport report = BuildPipeline.BuildPlayer(buildPlayerOptions);
-        BuildSummary summary = report.summary;
-
-        if (summary.result == BuildResult.Succeeded)
+        // find: -executeMethod
+        //   +1: JenkinsBuild.BuildMacOS
+        //   +2: VRDungeons
+        //   +3: /Users/Shared/Jenkins/Home/jobs/VRDungeons/builds/47/output
+        string[] args = System.Environment.GetCommandLineArgs();
+        for (int i = 0; i < args.Length; i++)
         {
-            Debug.Log("Build succeeded: " + summary.totalSize + " bytes");
+            if (args[i] == "-executeMethod")
+            {
+                if (i + 4 < args.Length)
+                {
+                    // BuildMacOS method is args[i+1]
+                    appName = args[i + 2];
+                    targetDir = args[i + 3];
+                    i += 3;
+                }
+                else
+                {
+                    System.Console.WriteLine("[JenkinsBuild] Incorrect Parameters for -executeMethod Format: -executeMethod BuildMacOS <app name> <output dir>");
+                    return;
+                }
+            }
         }
 
-        if (summary.result == BuildResult.Failed)
-        {
-            Debug.Log("Build failed");
-        }
+        // e.g. // /Users/Shared/Jenkins/Home/jobs/VRDungeons/builds/47/output/VRDungeons.app
+        string fullPathAndName = targetDir + System.IO.Path.DirectorySeparatorChar + appName + ".apk";
+        BuildProject(EnabledScenes, fullPathAndName, BuildTargetGroup.Standalone, BuildTarget.Android, BuildOptions.None);
     }
 
-    [MenuItem("Build/Build Mac OS X")]
-    public static void PerformMacOSXBuild()
+    [MenuItem("Build/MacOS")]
+    public static void BuildMacOS()
     {
-        BuildPlayerOptions buildPlayerOptions = new BuildPlayerOptions();
-        buildPlayerOptions.scenes = FindEnabledEditorScenes();
-        buildPlayerOptions.locationPathName = "Builds/iOS";
-        buildPlayerOptions.target = BuildTarget.iOS;
-        buildPlayerOptions.options = BuildOptions.None;
 
-        BuildReport report = BuildPipeline.BuildPlayer(buildPlayerOptions);
-        BuildSummary summary = report.summary;
+        string appName = "AppName";
+        string targetDir = "~/Desktop";
 
-        if (summary.result == BuildResult.Succeeded)
+        // find: -executeMethod
+        //   +1: JenkinsBuild.BuildMacOS
+        //   +2: VRDungeons
+        //   +3: /Users/Shared/Jenkins/Home/jobs/VRDungeons/builds/47/output
+        string[] args = System.Environment.GetCommandLineArgs();
+        for (int i = 0; i < args.Length; i++)
         {
-            Debug.Log("Build succeeded: " + summary.totalSize + " bytes");
+            if (args[i] == "-executeMethod")
+            {
+                if (i + 4 < args.Length)
+                {
+                    // BuildMacOS method is args[i+1]
+                    appName = args[i + 2];
+                    targetDir = args[i + 3];
+                    i += 3;
+                }
+                else
+                {
+                    System.Console.WriteLine("[JenkinsBuild] Incorrect Parameters for -executeMethod Format: -executeMethod BuildMacOS <app name> <output dir>");
+                    return;
+                }
+            }
         }
 
-        if (summary.result == BuildResult.Failed)
-        {
-            Debug.Log("Build failed");
-        }
+        // e.g. // /Users/Shared/Jenkins/Home/jobs/VRDungeons/builds/47/output/VRDungeons.app
+        string fullPathAndName = targetDir + System.IO.Path.DirectorySeparatorChar + appName + ".app";
+        BuildProject(EnabledScenes, fullPathAndName, BuildTargetGroup.Standalone, BuildTarget.StandaloneOSX, BuildOptions.None);
     }
 
+    // ------------------------------------------------------------------------
+    // ------------------------------------------------------------------------
     private static string[] FindEnabledEditorScenes()
     {
+
         List<string> EditorScenes = new List<string>();
         foreach (EditorBuildSettingsScene scene in EditorBuildSettings.scenes)
         {
-            if (!scene.enabled) continue;
-            EditorScenes.Add(scene.path);
+            if (scene.enabled)
+            {
+                EditorScenes.Add(scene.path);
+            }
         }
         return EditorScenes.ToArray();
+    }
+
+    // ------------------------------------------------------------------------
+    // e.g. BuildTargetGroup.Standalone, BuildTarget.StandaloneOSX
+    // ------------------------------------------------------------------------
+    private static void BuildProject(string[] scenes, string targetDir, BuildTargetGroup buildTargetGroup, BuildTarget buildTarget, BuildOptions buildOptions)
+    {
+        System.Console.WriteLine("[JenkinsBuild] Building:" + targetDir + " buildTargetGroup:" + buildTargetGroup.ToString() + " buildTarget:" + buildTarget.ToString());
+
+        // https://docs.unity3d.com/ScriptReference/EditorUserBuildSettings.SwitchActiveBuildTarget.html
+        bool switchResult = EditorUserBuildSettings.SwitchActiveBuildTarget(buildTargetGroup, buildTarget);
+        if (switchResult)
+        {
+            System.Console.WriteLine("[JenkinsBuild] Successfully changed Build Target to: " + buildTarget.ToString());
+        }
+        else
+        {
+            System.Console.WriteLine("[JenkinsBuild] Unable to change Build Target to: " + buildTarget.ToString() + " Exiting...");
+            return;
+        }
+
+        // https://docs.unity3d.com/ScriptReference/BuildPipeline.BuildPlayer.html
+        BuildReport buildReport = BuildPipeline.BuildPlayer(scenes, targetDir, buildTarget, buildOptions);
+        BuildSummary buildSummary = buildReport.summary;
+        if (buildSummary.result == BuildResult.Succeeded)
+        {
+            System.Console.WriteLine("[JenkinsBuild] Build Success: Time:" + buildSummary.totalTime + " Size:" + buildSummary.totalSize + " bytes");
+        }
+        else
+        {
+            System.Console.WriteLine("[JenkinsBuild] Build Failed: Time:" + buildSummary.totalTime + " Total Errors:" + buildSummary.totalErrors);
+        }
     }
 }
