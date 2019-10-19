@@ -20,7 +20,7 @@ public class JenkinsBuild
     public static void BuildAndroid()
     {
         string appName = "TestProject";
-        string targetDir = "~/Desktop";
+        string targetDir = "~/Android";
 
         // find: -executeMethod
         //   +1: JenkinsBuild.BuildMacOS
@@ -40,12 +40,14 @@ public class JenkinsBuild
                 }
                 else
                 {
-                    System.Console.WriteLine("[JenkinsBuild] Incorrect Parameters for -executeMethod Format: -executeMethod BuildMacOS <app name> <output dir>");
-                    return;
+                    foreach (var arg in args)
+                    {
+                        System.Console.WriteLine("Argument " + i + ": " + arg);
+                    }
+                    throw new System.Exception("[JenkinsBuild] Incorrect Parameters for -executeMethod Format: -executeMethod Android <app name> <output dir>");
                 }
             }
         }
-
         // e.g. // /Users/Shared/Jenkins/Home/jobs/VRDungeons/builds/47/output/VRDungeons.app
         string fullPathAndName = targetDir + System.IO.Path.DirectorySeparatorChar + appName + ".apk";
         BuildProject(EnabledScenes, fullPathAndName, BuildTargetGroup.Standalone, BuildTarget.Android, BuildOptions.None);
@@ -55,7 +57,7 @@ public class JenkinsBuild
     public static void BuildMacOS()
     {
 
-        string appName = "AppName";
+        string appName = "TestProject";
         string targetDir = "~/Desktop";
 
         // find: -executeMethod
@@ -76,8 +78,11 @@ public class JenkinsBuild
                 }
                 else
                 {
-                    System.Console.WriteLine("[JenkinsBuild] Incorrect Parameters for -executeMethod Format: -executeMethod BuildMacOS <app name> <output dir>");
-                    return;
+                    foreach (var arg in args)
+                    {
+                        System.Console.WriteLine("Argument " + i + ": " + arg);
+                    }
+                    throw new System.Exception("[JenkinsBuild] Incorrect Parameters for -executeMethod Format: -executeMethod BuildMacOS <app name> <output dir>");
                 }
             }
         }
