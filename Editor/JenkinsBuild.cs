@@ -118,6 +118,9 @@ public class JenkinsBuild
     // ------------------------------------------------------------------------
     private static void BuildProject(string[] scenes, string targetDir, BuildTargetGroup buildTargetGroup, BuildTarget buildTarget, BuildOptions buildOptions)
     {
+        PlayerSettings.keyaliasPass = "Qpalzm.10";
+        PlayerSettings.keystorePass = "Qpalzm.10";
+
         System.Console.WriteLine("[JenkinsBuild] Building:" + targetDir + " buildTargetGroup:" + buildTargetGroup.ToString() + " buildTarget:" + buildTarget.ToString());
 
         // https://docs.unity3d.com/ScriptReference/EditorUserBuildSettings.SwitchActiveBuildTarget.html
