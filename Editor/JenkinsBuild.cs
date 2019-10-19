@@ -19,14 +19,15 @@ public class JenkinsBuild
     [MenuItem("Build/Android")]
     public static void BuildAndroid()
     {
-        string appName = "TestProject";
+        string appName = "BBBalls-Release";
         string targetDir = "Builds/Android";
 
         // find: -executeMethod
         //   +1: JenkinsBuild.BuildMacOS
         //   +2: VRDungeons
         //   +3: /Users/Shared/Jenkins/Home/jobs/VRDungeons/builds/47/output
-        string[] args = System.Environment.GetCommandLineArgs();
+        /*        
+		string[] args = System.Environment.GetCommandLineArgs();
         for (int i = 0; i < args.Length; i++)
         {
             if (args[i] == "-executeMethod")
@@ -36,6 +37,11 @@ public class JenkinsBuild
                     // Android method is args[i+1]
                     appName = args[i + 2];
                     targetDir = args[i + 3];
+					break;
+                    for (int x = 0; x < args.Length; x++)
+                    {
+                        System.Console.WriteLine("Argument " + x + ": " + args[x]);
+                    }
                 }
                 else
                 {
@@ -47,6 +53,7 @@ public class JenkinsBuild
                 }
             }
         }
+		*/
         // e.g. // /Users/Shared/Jenkins/Home/jobs/VRDungeons/builds/47/output/VRDungeons.app
         string fullPathAndName = targetDir + System.IO.Path.DirectorySeparatorChar + appName + ".apk";
         BuildProject(EnabledScenes, fullPathAndName, BuildTargetGroup.Standalone, BuildTarget.Android, BuildOptions.None);
