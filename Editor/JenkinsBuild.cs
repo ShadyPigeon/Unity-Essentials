@@ -40,9 +40,9 @@ public class JenkinsBuild
                 }
                 else
                 {
-                    foreach (var arg in args)
+                    for (int x = 0; x < args.Length; x++)
                     {
-                        System.Console.WriteLine("Argument " + i + ": " + arg);
+                        System.Console.WriteLine("Argument " + x + ": " + args[x]);
                     }
                     throw new System.Exception("[JenkinsBuild] Incorrect Parameters for -executeMethod Format: -executeMethod Android <app name> <output dir>");
                 }
@@ -78,9 +78,9 @@ public class JenkinsBuild
                 }
                 else
                 {
-                    foreach (var arg in args)
+                    for (int x = 0; x < args.Length; x++)
                     {
-                        System.Console.WriteLine("Argument " + i + ": " + arg);
+                        System.Console.WriteLine("Argument " + x + ": " + args[x]);
                     }
                     throw new System.Exception("[JenkinsBuild] Incorrect Parameters for -executeMethod Format: -executeMethod BuildMacOS <app name> <output dir>");
                 }
