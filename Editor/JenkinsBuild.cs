@@ -17,7 +17,7 @@ public class JenkinsBuild
     // called from Jenkins
     // ------------------------------------------------------------------------
     [MenuItem("Build/Windows")]
-    public static void BuildAndroid()
+    public static void BuildWindows()
     {
         string appName = "BBBalls-Release";
         string targetDir = "Builds/Windows";
