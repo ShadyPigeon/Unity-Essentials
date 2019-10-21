@@ -36,11 +36,11 @@ public class JenkinsBuild
                     // Android method is args[i+1]
                     appName = args[i + 2];
                     targetDir = args[i + 3];
-					break;
                     for (int x = 0; x < args.Length; x++)
                     {
                         System.Console.WriteLine("Argument " + x + ": " + args[x]);
                     }
+					break;
                 }
                 else
                 {
@@ -77,11 +77,11 @@ public class JenkinsBuild
                     // Android method is args[i+1]
                     appName = args[i + 2];
                     targetDir = args[i + 3];
-					break;
                     for (int x = 0; x < args.Length; x++)
                     {
                         System.Console.WriteLine("Argument " + x + ": " + args[x]);
                     }
+					break;
                 }
                 else
                 {
