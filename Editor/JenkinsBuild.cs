@@ -5,135 +5,100 @@ using UnityEngine;
 using UnityEditor;
 using System.Collections.Generic;
 using UnityEditor.Build.Reporting;
+using System.IO;
+using System;
 
 // ------------------------------------------------------------------------
 // https://docs.unity3d.com/Manual/CommandLineArguments.html
 // ------------------------------------------------------------------------
 public class JenkinsBuild
 {
+    static string[] enabledScenes = FindEnabledEditorScenes();
+    static string appName = GetAppName();
 
-    static string[] EnabledScenes = FindEnabledEditorScenes();
-    // ------------------------------------------------------------------------
-    // called from Jenkins
-    // ------------------------------------------------------------------------
-    [MenuItem("Build/Windows")]
-    public static void BuildWindows()
+    public static string GetAppName()
     {
-        string appName = "BBBalls-Release";
-        string targetDir = "Builds/Windows";
-
-        // find: -executeMethod
-        //   +1: JenkinsBuild.BuildMacOS
-        //   +2: VRDungeons
-        //   +3: /Users/Shared/Jenkins/Home/jobs/VRDungeons/builds/47/output        
-		string[] args = System.Environment.GetCommandLineArgs();
-        for (int i = 0; i < args.Length; i++)
-        {
-            if (args[i] == "-executeMethod")
-            {
-                if (i + 3 < args.Length)
-                {
-                    // Android method is args[i+1]
-                    appName = args[i + 2];
-                    targetDir = args[i + 3];
-                    for (int x = 0; x < args.Length; x++)
-                    {
-                        System.Console.WriteLine("Argument " + x + ": " + args[x]);
-                    }
-					break;
-                }
-                else
-                {
-                    for (int x = 0; x < args.Length; x++)
-                    {
-                        System.Console.WriteLine("Argument " + x + ": " + args[x]);
-                    }
-                    throw new System.Exception("[JenkinsBuild] Incorrect Parameters for -executeMethod Format: -executeMethod Android <app name> <output dir>");
-                }
-            }
-        }
-        // e.g. // /Users/Shared/Jenkins/Home/jobs/VRDungeons/builds/47/output/VRDungeons.app
-        string fullPathAndName = targetDir + System.IO.Path.DirectorySeparatorChar + appName + ".exe";
-        BuildProject(EnabledScenes, fullPathAndName, BuildTargetGroup.Standalone, BuildTarget.StandaloneWindows, BuildOptions.None);
+        return Application.productName;
     }
-	
-	[MenuItem("Build/Android")]
-    public static void BuildAndroid()
+    public static string GetTargetDirectory(BuildTarget buildTarget)
     {
-        string appName = "BBBalls-Release";
-        string targetDir = "Builds/Android";
-
-        // find: -executeMethod
-        //   +1: JenkinsBuild.BuildMacOS
-        //   +2: VRDungeons
-        //   +3: /Users/Shared/Jenkins/Home/jobs/VRDungeons/builds/47/output        
-		string[] args = System.Environment.GetCommandLineArgs();
-        for (int i = 0; i < args.Length; i++)
-        {
-            if (args[i] == "-executeMethod")
-            {
-                if (i + 3 < args.Length)
-                {
-                    // Android method is args[i+1]
-                    appName = args[i + 2];
-                    targetDir = args[i + 3];
-                    for (int x = 0; x < args.Length; x++)
-                    {
-                        System.Console.WriteLine("Argument " + x + ": " + args[x]);
-                    }
-					break;
-                }
-                else
-                {
-                    for (int x = 0; x < args.Length; x++)
-                    {
-                        System.Console.WriteLine("Argument " + x + ": " + args[x]);
-                    }
-                    throw new System.Exception("[JenkinsBuild] Incorrect Parameters for -executeMethod Format: -executeMethod Android <app name> <output dir>");
-                }
-            }
-        }
-        // e.g. // /Users/Shared/Jenkins/Home/jobs/VRDungeons/builds/47/output/VRDungeons.app
-        string fullPathAndName = targetDir + System.IO.Path.DirectorySeparatorChar + appName + ".apk";
-        BuildProject(EnabledScenes, fullPathAndName, BuildTargetGroup.Standalone, BuildTarget.Android, BuildOptions.None);
-    }
-
-    [MenuItem("Build/MacOS")]
-    public static void BuildMacOS()
-    {
-
-        string appName = "TestProject";
-        string targetDir = "~/Desktop";
-
-        // find: -executeMethod
-        //   +1: JenkinsBuild.BuildMacOS
-        //   +2: VRDungeons
-        //   +3: /Users/Shared/Jenkins/Home/jobs/VRDungeons/builds/47/output
         string[] args = System.Environment.GetCommandLineArgs();
         for (int i = 0; i < args.Length; i++)
         {
-            if (args[i] == "-executeMethod")
+            if (args[i] == "-targetDirectory")
             {
-                if (i + 3 < args.Length)
-                {
-                    // BuildMacOS method is args[i+1]
-                    appName = args[i + 2];
-                    targetDir = args[i + 3];
-                }
-                else
-                {
-                    for (int x = 0; x < args.Length; x++)
-                    {
-                        System.Console.WriteLine("Argument " + x + ": " + args[x]);
-                    }
-                    throw new System.Exception("[JenkinsBuild] Incorrect Parameters for -executeMethod Format: -executeMethod BuildMacOS <app name> <output dir>");
-                }
+                return args[i + 1] + Path.DirectorySeparatorChar + buildTarget.ToString();
             }
         }
+        return "Builds" + Path.DirectorySeparatorChar + buildTarget.ToString();
+    }
 
-        // e.g. // /Users/Shared/Jenkins/Home/jobs/VRDungeons/builds/47/output/VRDungeons.app
-        string fullPathAndName = targetDir + System.IO.Path.DirectorySeparatorChar + appName + ".app";
-        BuildProject(EnabledScenes, fullPathAndName, BuildTargetGroup.Standalone, BuildTarget.StandaloneOSX, BuildOptions.None);
+    // ------------------------------------------------------------------------
+    // called from Jenkins
+    // ------------------------------------------------------------------------
+    [MenuItem("Build/Android")]
+    public static void BuildAndroid()
+    {
+        string fileType = ".apk";
+        BuildTarget targetPlatform = BuildTarget.Android;
+        BuildTargetGroup targetGroup = BuildTargetGroup.Standalone;
+        BuildOptions buildOptions = BuildOptions.None;
+
+        string targetDir = GetTargetDirectory(targetPlatform);
+        string fullPathToFile = targetDir + Path.DirectorySeparatorChar + appName;
+        BuildProject(enabledScenes, fullPathToFile + fileType, targetGroup, targetPlatform, buildOptions);
+    }
+
+    [MenuItem("Build/iOS")]
+    public static void BuildiOS()
+    {
+        string fileType = ".ipa";
+        BuildTarget targetPlatform = BuildTarget.iOS;
+        BuildTargetGroup targetGroup = BuildTargetGroup.Standalone;
+        BuildOptions buildOptions = BuildOptions.None;
+
+        string targetDir = GetTargetDirectory(targetPlatform);
+        string fullPathToFile = targetDir + Path.DirectorySeparatorChar + appName;
+        BuildProject(enabledScenes, fullPathToFile + fileType, targetGroup, targetPlatform, buildOptions);
+    }
+
+    [MenuItem("Build/Windows (x86)")]
+    public static void BuildWindowsx86()
+    {
+        string fileType = ".exe";
+        BuildTarget targetPlatform = BuildTarget.StandaloneWindows;
+        BuildTargetGroup targetGroup = BuildTargetGroup.Standalone;
+        BuildOptions buildOptions = BuildOptions.None;
+
+        string targetDir = GetTargetDirectory(targetPlatform);
+        string fullPathToFile = targetDir + Path.DirectorySeparatorChar + appName;
+        BuildProject(enabledScenes, fullPathToFile + fileType, targetGroup, targetPlatform, buildOptions);
+    }
+
+    [MenuItem("Build/Windows (x64)")]
+    public static void BuildWindowsx64()
+    {
+        string fileType = ".exe";
+        BuildTarget targetPlatform = BuildTarget.StandaloneWindows64;
+        BuildTargetGroup targetGroup = BuildTargetGroup.Standalone;
+        BuildOptions buildOptions = BuildOptions.None;
+
+        string targetDir = GetTargetDirectory(targetPlatform);
+        string fullPathToFile = targetDir + Path.DirectorySeparatorChar + appName;
+        BuildProject(enabledScenes, fullPathToFile + fileType, targetGroup, targetPlatform, buildOptions);
+    }
+
+    [MenuItem("Build/Mac OSX")]
+    public static void BuildMacOSX()
+    {
+        string fileType = ".app";
+        BuildTarget targetPlatform = BuildTarget.StandaloneOSX;
+        BuildTargetGroup targetGroup = BuildTargetGroup.Standalone;
+        BuildOptions buildOptions = BuildOptions.None;
+
+        string targetDir = GetTargetDirectory(targetPlatform);
+        string fullPathToFile = targetDir + Path.DirectorySeparatorChar + appName;
+        BuildProject(enabledScenes, fullPathToFile + fileType, targetGroup, targetPlatform, buildOptions);
     }
 
     // ------------------------------------------------------------------------
@@ -157,20 +122,17 @@ public class JenkinsBuild
     // ------------------------------------------------------------------------
     private static void BuildProject(string[] scenes, string targetDir, BuildTargetGroup buildTargetGroup, BuildTarget buildTarget, BuildOptions buildOptions)
     {
-        PlayerSettings.keyaliasPass = "Qpalzm.10";
-        PlayerSettings.keystorePass = "Qpalzm.10";
-
-        System.Console.WriteLine("[JenkinsBuild] Building:" + targetDir + " buildTargetGroup:" + buildTargetGroup.ToString() + " buildTarget:" + buildTarget.ToString());
+        Console.WriteLine("[JenkinsBuild] Building:" + targetDir + " buildTargetGroup:" + buildTargetGroup.ToString() + " buildTarget:" + buildTarget.ToString());
 
         // https://docs.unity3d.com/ScriptReference/EditorUserBuildSettings.SwitchActiveBuildTarget.html
         bool switchResult = EditorUserBuildSettings.SwitchActiveBuildTarget(buildTargetGroup, buildTarget);
         if (switchResult)
         {
-            System.Console.WriteLine("[JenkinsBuild] Successfully changed Build Target to: " + buildTarget.ToString());
+            Console.WriteLine("[JenkinsBuild] Successfully changed Build Target to: " + buildTarget.ToString());
         }
         else
         {
-            System.Console.WriteLine("[JenkinsBuild] Unable to change Build Target to: " + buildTarget.ToString() + " Exiting...");
+            Console.WriteLine("[JenkinsBuild] Unable to change Build Target to: " + buildTarget.ToString() + " Exiting...");
             return;
         }
 
@@ -179,11 +141,11 @@ public class JenkinsBuild
         BuildSummary buildSummary = buildReport.summary;
         if (buildSummary.result == BuildResult.Succeeded)
         {
-            System.Console.WriteLine("[JenkinsBuild] Build Success: Time:" + buildSummary.totalTime + " Size:" + buildSummary.totalSize + " bytes");
+            Console.WriteLine("[JenkinsBuild] Build Success: Time:" + buildSummary.totalTime + " Size:" + buildSummary.totalSize + " bytes");
         }
         else
         {
-            System.Console.WriteLine("[JenkinsBuild] Build Failed: Time:" + buildSummary.totalTime + " Total Errors:" + buildSummary.totalErrors);
+            Console.WriteLine("[JenkinsBuild] Build Failed: Time:" + buildSummary.totalTime + " Total Errors:" + buildSummary.totalErrors);
         }
     }
 }
